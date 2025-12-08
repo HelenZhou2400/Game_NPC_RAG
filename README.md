@@ -5,7 +5,7 @@ The system performs retrieval over a FAISS vector index generated from the *Vide
 
 The Streamlit interface provides a clean way to test the RAG pipeline locally or on cloud environments such as a GCP CPU VM.
 
----
+
 
 ## Dataset Source
 
@@ -17,7 +17,6 @@ Released: 2021-08-27
 Repository: [https://github.com/Davis24/video-game-text-dataset](https://github.com/Davis24/video-game-text-dataset)
 CFF Version: 1.2.0
 
----
 
 ## Repository Structure
 
@@ -36,7 +35,6 @@ CFF Version: 1.2.0
 The `utils/` folder includes the original development scripts used during preprocessing, index generation, and environment-specific benchmarking.
 The Streamlit app uses the refactored `rag_core.py`, which encapsulates the final RAG logic.
 
----
 
 ## How the RAG System Works
 
@@ -60,7 +58,6 @@ The Streamlit app uses the refactored `rag_core.py`, which encapsulates the fina
    * Output token count
    * Retrieved context snippets
 
----
 
 ## Running Locally
 
@@ -90,7 +87,6 @@ Then open in a browser:
 http://localhost:8501
 ```
 
----
 
 ## Benchmarking and Additional Scripts
 
