@@ -25,7 +25,7 @@ CFF Version: 1.2.0
 ├── app_streamlit.py               # Streamlit UI for querying the RAG system
 ├── rag_core.py                    # Core RAG logic: FAISS retrieval, context construction, LLM generation
 ├── requirements.txt               # Project dependencies
-├── universal_game_index/          # Prebuilt FAISS index directory (created beforehand)
+├── universal_game_index/          # Prebuilt FAISS index directory (created beforehand with utils/rag.py)
 ├── utils/
 │   ├── rag.py                     # Script originally used for FAISS index creation and local RAG testing
 │   └── benchmark.py               # Script used for performance benchmarking across environments
@@ -61,21 +61,16 @@ The Streamlit app uses the refactored `rag_core.py`, which encapsulates the fina
 
 ## Running Locally
 
-### 1. Create and activate a virtual environment
+#### Create and activate a virtual environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-```
 
-### 2. Install dependencies
-
-```bash
-pip install --upgrade pip
+# install dependencies
 pip install -r requirements.txt
 ```
-
-### 3. Launch the Streamlit application
+#### Launch the Streamlit application
 
 ```bash
 streamlit run app_streamlit.py
@@ -87,6 +82,71 @@ Then open in a browser:
 http://localhost:8501
 ```
 
+## Running on GCP VM
+
+#### Create a VM instance
+
+- In the Google Cloud console, go to **Compute Engine → VM instances → Create instance**.
+- Example settings:
+
+   * OS: Ubuntu 22.04 LTS
+   * Machine type: `e2-standard-4` (4 vCPUs, 16 GB RAM)
+   * **Boot disk size**:
+
+     * Recommended: **50–100 GB**
+     * Hugging Face models and dataset/index caches (e.g., under `~/.cache/huggingface`) can be large; a small disk may fill up quickly.
+- Add new **firewall rule** for streamlit port 8501
+  - Go to **VPC network → Firewall → Create firewall rule**
+  - Example configuration:
+
+     * Name: `allow-streamlit-8501`
+     * Targets: Specified target tags, ex: `streamlit-server`
+     * Source IPv4 ranges: `0.0.0.0/0` (or restrict to your IP for more security)
+     * Protocols and ports: `tcp:8501`
+- Under **Network tags** for VM, add firewal rule tag (ex. `streamlit-server`).
+- Create the VM instance
+
+
+#### SSH into the VM and set up the environment
+
+```bash
+sudo apt-get update
+sudo apt-get install -y python3 python3-venv python3-pip git build-essential
+
+mkdir ~/rag_demo
+cd ~/rag_demo
+
+git clone https://github.com/HelenZhou2400/Game_NPC_RAG .
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install --upgrade pip
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
+```
+
+#### Run the Streamlit app
+
+```bash
+cd ~/rag_demo
+source venv/bin/activate
+streamlit run app_streamlit.py --server.address 0.0.0.0 --server.port 8501
+```
+
+* `--server.address 0.0.0.0` allows external connections.
+* `--server.port 8501` is the port you opened in the firewall rule.
+
+Leave this process running while you use the app.
+
+
+#### Access the app from your browser
+
+Find the VM’s **External IP** in the VM instances list, then open:
+
+```text
+http://<GCP_EXTERNAL_IP>:8501/
+```
 
 ## Benchmarking and Additional Scripts
 
@@ -99,4 +159,3 @@ The `utils/benchmark.py` script was used to measure performance across different
 Metrics include latency, throughput, and token-level statistics.
 
 The `utils/rag.py` script contains the original prototype RAG implementation used to generate the FAISS index and test retrieval logic before refactoring it into `rag_core.py`.
-

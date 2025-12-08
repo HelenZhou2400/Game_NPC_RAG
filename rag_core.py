@@ -23,13 +23,9 @@ model = None
 vectorstore = None
 
 
-def get_environment() -> str:
+RAG_ENV = "local"
+# RAG_ENV = "gcp cpu vm"
 
-    env_override = os.environ.get("RAG_ENV")
-    if env_override:
-        return env_override
-
-    return "local"
 
 
 def load_vectorstore() -> FAISS:
@@ -77,7 +73,7 @@ def init_rag():
         print("Index loaded.")
 
     if model is None or tokenizer is None:
-        environment = get_environment()
+        environment = RAG_ENV
         print(
             f"Loading model {MODEL_NAME} on {environment} CPU..."
         )
@@ -96,7 +92,7 @@ def get_answer(
         init_rag()
         print("RAG not initialized, re-initializing...")
 
-    environment = get_environment()
+    environment = RAG_ENV
     start_total = time.time()
 
     # retrieve documents

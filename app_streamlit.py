@@ -1,7 +1,7 @@
 # app_streamlit.py
 
 import streamlit as st
-from rag_core import init_rag, get_answer, get_environment
+from rag_core import init_rag, get_answer, RAG_ENV
 
 st.set_page_config(
     page_title="Game NPC RAG Demo",
@@ -29,7 +29,7 @@ if "rag_initialized" not in st.session_state:
     st.success("RAG initialized")
 
 # runtime info display
-environment = get_environment()
+environment = RAG_ENV
 env_col = st.columns(1)[0]
 with env_col:
     st.write(f"**Environment:** `{environment}`")
