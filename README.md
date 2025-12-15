@@ -82,7 +82,7 @@ The Streamlit app uses the refactored `rag_core.py`, which encapsulates the fina
 - Under **Network tags** for VM, add firewal rule tag (ex. `streamlit-server`).
 - Create the VM instance
 
-## Running with Docker
+## Running Locally
 
 
 #### Build and Run with Docker
