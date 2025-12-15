@@ -58,22 +58,48 @@ The Streamlit app uses the refactored `rag_core.py`, which encapsulates the fina
    * Output token count
    * Retrieved context snippets
 
+## Running with GCP VM
 
-## Running Locally
+#### Create a VM instance
 
-#### Create and activate a virtual environment
+- In the Google Cloud console, go to **Compute Engine → VM instances → Create instance**.
+- Example settings:
+
+   * OS: Ubuntu 22.04 LTS
+   * Machine type: `e2-standard-4` (4 vCPUs, 16 GB RAM)
+   * **Boot disk size**:
+
+     * Recommended: **50–100 GB**
+     * Hugging Face models and dataset/index caches (e.g., under `~/.cache/huggingface`) can be large; a small disk may fill up quickly.
+- Add new **firewall rule** for streamlit port 8501
+  - Go to **VPC network → Firewall → Create firewall rule**
+  - Example configuration:
+
+     * Name: `allow-streamlit-8501`
+     * Targets: Specified target tags, ex: `streamlit-server`
+     * Source IPv4 ranges: `0.0.0.0/0` (or restrict to your IP for more security)
+     * Protocols and ports: `tcp:8501`
+- Under **Network tags** for VM, add firewal rule tag (ex. `streamlit-server`).
+- Create the VM instance
+
+## Running with Docker
+
+
+#### Build and Run with Docker
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+docker build -t game-rag:latest -f utils/Dockerfile .
 
-# install dependencies
-pip install -r requirements.txt
+# run scripts
+docker run --rm game-rag:latest python3 utils/rag.py
+docker run --rm game-rag:latest python3 utils/benchmark.py
 ```
-#### Launch the Streamlit application
+#### Run Streamlit application
 
 ```bash
-streamlit run app_streamlit.py
+docker run --rm -p 8501:8501 game-rag:latest \
+  python3 -m streamlit run app_streamlit.py \
+  --server.address=0.0.0.0 --server.port=8501
 ```
 
 Then open in a browser:
@@ -82,7 +108,12 @@ Then open in a browser:
 http://localhost:8501
 ```
 
-## Running on GCP VM
+Running with GPUs:
+```
+docker run --rm --gpus all game-rag:latest python3 utils/benchmark.py
+```
+
+## Running with GCP VM
 
 #### Create a VM instance
 
@@ -107,31 +138,26 @@ http://localhost:8501
 - Create the VM instance
 
 
-#### SSH into the VM and set up the environment
+#### SSH into the VM and run with Docker
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y python3 python3-venv python3-pip git build-essential
+sudo apt-get install -y docker.io git build-essential
 
 mkdir ~/rag_demo
 cd ~/rag_demo
 
 git clone https://github.com/HelenZhou2400/Game_NPC_RAG .
 
-python3 -m venv venv
-source venv/bin/activate
-
-pip install --upgrade pip
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
+docker build -t game-rag:latest -f utils/Dockerfile .
 ```
 
 #### Run the Streamlit app
 
 ```bash
-cd ~/rag_demo
-source venv/bin/activate
-streamlit run app_streamlit.py --server.address 0.0.0.0 --server.port 8501
+docker run --rm -p 8501:8501 game-rag:latest \
+  python3 -m streamlit run app_streamlit.py \
+  --server.address=0.0.0.0 --server.port=8501
 ```
 
 * `--server.address 0.0.0.0` allows external connections.
